@@ -145,23 +145,16 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public List<StockAlertDTO> getInventoryAlerts() {
-        return productRepository.findAll().stream()
-                .filter(p -> !p.isDeleted())
-                .filter(p -> p.getCurrentStock() <= p.getMinStock()) // Solo productos en riesgo
+        // Usamos el nuevo método optimizado
+        return productRepository.findCriticalStockProducts()
+                .stream()
                 .map(p -> {
-                    String status;
-                    String suggestion;
+                    String status = (p.getCurrentStock() == 0) ? "CRÍTICO" :
+                            (p.getLeadTime() > 5) ? "ADVERTENCIA" : "STOCK_BAJO";
 
-                    if (p.getCurrentStock() == 0) {
-                        status = "CRÍTICO";
-                        suggestion = "Stock agotado. Pedir inmediatamente a " + p.getSupplier().getName();
-                    } else if (p.getLeadTime() > 5) {
-                        status = "ADVERTENCIA";
-                        suggestion = "El proveedor tarda mucho (" + p.getLeadTime() + " días). Adelantar pedido.";
-                    } else {
-                        status = "STOCK_BAJO";
-                        suggestion = "Considerar reposición pronto.";
-                    }
+                    String suggestion = (p.getCurrentStock() == 0) ?
+                            "Stock agotado. Pedir inmediatamente a " + p.getSupplier().getName() :
+                            "Considerar reposición pronto.";
 
                     return StockAlertDTO.builder()
                             .productId(p.getId())

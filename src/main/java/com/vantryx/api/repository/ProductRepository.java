@@ -2,6 +2,7 @@ package com.vantryx.api.repository;
 
 import com.vantryx.api.model.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -20,4 +21,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     // Spring "entiende" que debe buscar en la tabla productos donde el ID del proveedor coincida
     List<Product> findBySupplierIdAndIsDeletedFalse(Long supplierId);
+
+    // OPTIMIZACIÓN: El filtro se hace en la base de datos (SQL)
+    @Query("SELECT p FROM Product p WHERE p.deleted = false AND p.currentStock <= p.minStock")
+    List<Product> findCriticalStockProducts();
 }

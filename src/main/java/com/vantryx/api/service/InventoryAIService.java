@@ -6,7 +6,9 @@ import com.vantryx.api.repository.ProductRepository;
 import com.vantryx.api.repository.StockMovementRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -19,21 +21,29 @@ public class InventoryAIService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
-        // 1. Calculamos ventas de los últimos 7 días
-        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
-        Integer totalSold = movementRepository.sumOutQuantitySince(productId, sevenDaysAgo);
+        // 1. Definimos nuestra ventana de análisis (ej. 7 días)
+        int maxDaysToAnalyze = 7;
+        LocalDateTime startDate = LocalDateTime.now().minusDays(maxDaysToAnalyze);
 
         // 2. Obtenemos las ventas totales en ese periodo
         Integer totalSold = movementRepository.sumOutQuantitySince(productId, startDate);
         if (totalSold == null) totalSold = 0;
 
-        // 2. Calculamos media diaria (total / 7 días)
-        double avgDaily = totalSold / 7.0;
+        // 3. ¡MEJORA! Calculamos los días reales de actividad
+        // Contamos los días entre la creación del producto y hoy
+        long daysSinceCreation = ChronoUnit.DAYS.between(product.getCreatedAt(), LocalDateTime.now());
 
-        // 3. Calculamos días restantes (Stock actual / Media diaria)
+        // Usamos el mínimo entre los días que tiene el producto y el máximo de nuestra ventana
+        // Usamos Math.max(..., 1) para evitar divisiones por cero si el producto se creó hoy
+        long actualDays = Math.min(Math.max(daysSinceCreation, 1), maxDaysToAnalyze);
+
+        // 4. Calculamos media diaria real
+        double avgDaily = (double) totalSold / actualDays;
+
+        // 5. Calculamos días restantes
         int daysLeft = (avgDaily > 0) ? (int) (product.getCurrentStock() / avgDaily) : 999;
 
-        // 4. Definimos el estado
+        // 6. Definimos el estado
         String status = "STABLE";
         if (daysLeft < 3) status = "CRITICAL";
         else if (daysLeft < 7) status = "WARNING";
