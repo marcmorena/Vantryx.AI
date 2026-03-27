@@ -23,6 +23,8 @@ public class InventoryAIService {
         LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
         Integer totalSold = movementRepository.sumOutQuantitySince(productId, sevenDaysAgo);
 
+        // 2. Obtenemos las ventas totales en ese periodo
+        Integer totalSold = movementRepository.sumOutQuantitySince(productId, startDate);
         if (totalSold == null) totalSold = 0;
 
         // 2. Calculamos media diaria (total / 7 días)
