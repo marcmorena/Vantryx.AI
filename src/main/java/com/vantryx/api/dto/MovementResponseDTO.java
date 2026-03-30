@@ -12,5 +12,6 @@ public class MovementResponseDTO {
     private Integer quantity;
     private MovementType type;
     private String reason;
+    private String username;
     private LocalDateTime createdAt;
 }

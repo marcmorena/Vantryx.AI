@@ -4,8 +4,9 @@ import com.vantryx.api.model.Supplier;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface SupplierRepository extends JpaRepository<Supplier, Long> {
-    // Aquí podrías añadir métodos personalizados en el futuro,
-    // como buscar por nombre o por email.
+    Optional<Supplier> findByName(String name);
 }

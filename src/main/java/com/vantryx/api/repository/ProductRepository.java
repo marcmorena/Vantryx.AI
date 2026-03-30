@@ -23,6 +23,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findBySupplierIdAndIsDeletedFalse(Long supplierId);
 
     // OPTIMIZACIÓN: El filtro se hace en la base de datos (SQL)
-    @Query("SELECT p FROM Product p WHERE p.deleted = false AND p.currentStock <= p.minStock")
+    @Query("SELECT p FROM Product p WHERE p.isDeleted = false AND p.currentStock <= p.minStock")
     List<Product> findCriticalStockProducts();
 }

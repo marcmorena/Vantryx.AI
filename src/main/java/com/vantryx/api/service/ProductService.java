@@ -39,11 +39,19 @@ public class ProductService {
 
     @Transactional
     public ProductDTO save(ProductDTO dto) {
-        // 1. Usamos ResourceNotFoundException para la categoría
+        // Validamos que los IDs vengan en el JSON antes de buscar
+        if (dto.getCategoryId() == null) {
+            throw new IllegalArgumentException("El categoryId es obligatorio");
+        }
+        if (dto.getSupplierId() == null) {
+            throw new IllegalArgumentException("El supplierId es obligatorio");
+        }
+
+        // 1. Buscamos la categoría
         Category category = categoryRepository.findById(dto.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada con ID: " + dto.getCategoryId()));
 
-        // 2. Usamos ResourceNotFoundException para el proveedor
+        // 2. Buscamos el proveedor
         Supplier supplier = supplierRepository.findById(dto.getSupplierId())
                 .orElseThrow(() -> new ResourceNotFoundException("Proveedor no encontrado con ID: " + dto.getSupplierId()));
 
@@ -145,7 +153,6 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public List<StockAlertDTO> getInventoryAlerts() {
-        // Usamos el nuevo método optimizado
         return productRepository.findCriticalStockProducts()
                 .stream()
                 .map(p -> {
