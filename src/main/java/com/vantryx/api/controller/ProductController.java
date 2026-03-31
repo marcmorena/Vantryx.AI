@@ -1,6 +1,5 @@
 package com.vantryx.api.controller;
 
-import com.vantryx.api.dto.DashboardDTO;
 import com.vantryx.api.dto.ProductDTO;
 import com.vantryx.api.dto.StockAlertDTO;
 import com.vantryx.api.service.ProductService;
@@ -43,11 +42,6 @@ public class ProductController {
         return ResponseEntity.ok(productService.update(id, dto));
     }
 
-    @GetMapping("/dashboard")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<DashboardDTO> getDashboard() {
-        return ResponseEntity.ok(productService.getDashboardStats());
-    }
 
     @GetMapping("/search")
     public ResponseEntity<List<ProductDTO>> searchProducts(@RequestParam String name) {

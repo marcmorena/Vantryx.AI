@@ -1,6 +1,5 @@
 package com.vantryx.api.service;
 
-import com.vantryx.api.dto.DashboardDTO;
 import com.vantryx.api.dto.ProductDTO;
 import com.vantryx.api.dto.StockAlertDTO;
 import com.vantryx.api.exception.ResourceNotFoundException;
@@ -15,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -100,34 +98,6 @@ public class ProductService {
         existingProduct.setSupplier(supplier);
 
         return productMapper.toDTO(productRepository.save(existingProduct));
-    }
-
-    @Transactional(readOnly = true)
-    public DashboardDTO getDashboardStats() {
-        // 1. Obtenemos productos activos
-        List<Product> allActiveProducts = productRepository.findAll()
-                .stream()
-                .filter(p -> !p.isDeleted())
-                .collect(Collectors.toList());
-
-        // 2. Calculamos valor total (Precio Venta * Stock)
-        BigDecimal totalPotentialRevenue = allActiveProducts.stream()
-                .map(p -> p.getSalePrice().multiply(BigDecimal.valueOf(p.getCurrentStock())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        // 3. Filtramos y mapeamos los productos con poco stock
-        List<ProductDTO> lowStock = allActiveProducts.stream()
-                .filter(p -> p.getCurrentStock() <= p.getMinStock())
-                .map(productMapper::toDTO)
-                .collect(Collectors.toList());
-
-        // 4. Construimos el DTO asegurando que los nombres coincidan con DashboardDTO
-        return DashboardDTO.builder()
-                .totalProducts((long) allActiveProducts.size()) // Casteo a long por seguridad
-                .totalInventoryValue(totalPotentialRevenue)
-                .lowStockProducts(lowStock)
-                .criticalAlertsCount((long) lowStock.size()) // Usamos el tamaño de la lista de riesgo
-                .build();
     }
 
     @Transactional(readOnly = true)
