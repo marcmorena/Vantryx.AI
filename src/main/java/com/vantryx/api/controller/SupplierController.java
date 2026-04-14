@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/suppliers")
 @Tag(name = "Suppliers", description = "Gestión de proveedores de Vantryx")
@@ -38,5 +40,10 @@ public class SupplierController {
         return supplierRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Supplier>> getAllSuppliers() {
+        return ResponseEntity.ok(supplierRepository.findAll());
     }
 }
