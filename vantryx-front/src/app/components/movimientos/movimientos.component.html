@@ -1,0 +1,219 @@
+<div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+
+  <!-- CABECERA -->
+  <div class="flex justify-between items-start">
+    <div>
+      <h2 class="text-2xl font-bold text-white tracking-tight">Movimientos de Inventario</h2>
+      <p class="text-slate-500 text-sm mt-1">Auditoría completa de entradas, salidas y ajustes de stock</p>
+    </div>
+  </div>
+
+  <!-- SELECTOR DE PRODUCTO -->
+  <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-6">
+    <label class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3 block">Selecciona un producto para ver su historial</label>
+    <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+      <select
+        [(ngModel)]="productoSeleccionadoId"
+        (ngModelChange)="onProductoChange()"
+        class="flex-1 bg-slate-900 border border-slate-700 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-colors">
+        <option [ngValue]="null" disabled>-- Elige un producto --</option>
+        <option *ngFor="let p of productos" [ngValue]="p.id">
+          {{ p.name }} — Stock: {{ p.currentStock }} ud.
+        </option>
+      </select>
+
+      <!-- Filtro tipo -->
+      <div *ngIf="productoSeleccionadoId" class="flex gap-2">
+        <button *ngFor="let tipo of ['TODOS', 'IN', 'OUT', 'ADJUSTMENT']"
+          (click)="setFiltro(tipo)"
+          [class]="filtroTipo === tipo
+            ? 'px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ' + (tipo === 'IN' ? 'bg-emerald-500 text-white' : tipo === 'OUT' ? 'bg-red-500 text-white' : tipo === 'ADJUSTMENT' ? 'bg-blue-500 text-white' : 'bg-slate-600 text-white')
+            : 'px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all bg-slate-700/50 text-slate-400 hover:text-white'">
+          {{ tipo === 'TODOS' ? 'Todos' : tipo === 'IN' ? 'Entradas' : tipo === 'OUT' ? 'Salidas' : 'Ajustes' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ESTADO VACÍO: sin producto seleccionado -->
+  <div *ngIf="!productoSeleccionadoId"
+       class="border-2 border-dashed border-slate-700 rounded-2xl py-24 text-center">
+    <div class="text-4xl mb-4">📋</div>
+    <p class="text-slate-400 font-semibold">Selecciona un producto para ver su historial</p>
+    <p class="text-slate-600 text-sm mt-1">Podrás ver cada entrada, salida y ajuste registrado</p>
+  </div>
+
+  <!-- CONTENIDO: producto seleccionado -->
+  <div *ngIf="productoSeleccionadoId" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- COLUMNA IZQUIERDA: Stats + Formulario -->
+    <div class="space-y-4">
+
+      <!-- Tarjeta de producto -->
+      <div *ngIf="productoActual" class="bg-slate-800/60 border border-slate-700 rounded-2xl p-5">
+        <p class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3">Producto</p>
+        <h3 class="text-white font-bold text-lg leading-tight mb-1">{{ productoActual.name }}</h3>
+        <p class="text-slate-500 text-xs mb-4">SKU: {{ productoActual.sku }}</p>
+        <div class="flex justify-between items-center">
+          <span class="text-slate-400 text-sm">Stock actual</span>
+          <span class="text-2xl font-bold"
+            [ngClass]="productoActual.currentStock <= productoActual.minStock ? 'text-red-400' : 'text-emerald-400'">
+            {{ productoActual.currentStock }} ud.
+          </span>
+        </div>
+        <div class="flex justify-between items-center mt-2">
+          <span class="text-slate-400 text-sm">Stock mínimo</span>
+          <span class="text-slate-300 font-semibold">{{ productoActual.minStock }} ud.</span>
+        </div>
+      </div>
+
+      <!-- Tarjeta de velocidad de ventas (IA) -->
+      <div *ngIf="historial.length > 0" class="bg-slate-900 border border-slate-700 rounded-2xl p-5">
+        <p class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-4">📊 Análisis IA — Últimos 30 días</p>
+
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <span class="text-slate-400 text-sm">Salidas totales</span>
+            <span class="text-white font-bold">{{ estadisticas.totalSalidas30d }} ud.</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-400 text-sm">Velocidad media</span>
+            <span class="text-blue-400 font-bold">{{ estadisticas.velocidadSemanal }} ud./sem</span>
+          </div>
+
+          <div *ngIf="estadisticas.diasHastaAgotamiento !== null" class="mt-3 pt-3 border-t border-slate-700">
+            <div class="flex justify-between items-center">
+              <span class="text-slate-400 text-sm">Previsión agotamiento</span>
+              <span class="font-bold text-sm" [class]="getStockAlertClass()">
+                {{ estadisticas.diasHastaAgotamiento }} días
+              </span>
+            </div>
+            <div *ngIf="estadisticas.diasHastaAgotamiento <= 21"
+                 class="mt-3 text-xs rounded-xl px-3 py-2"
+                 [ngClass]="estadisticas.diasHastaAgotamiento <= 7 ? 'bg-red-500/10 text-red-400' : 'bg-yellow-500/10 text-yellow-400'">
+              {{ estadisticas.diasHastaAgotamiento <= 7
+                  ? '🚨 Stock crítico. Realiza un pedido urgente.'
+                  : '⚠️ Stock bajo en menos de 3 semanas.' }}
+            </div>
+          </div>
+
+          <div *ngIf="estadisticas.velocidadSemanal === 0" class="text-slate-600 text-xs mt-2">
+            Sin salidas en los últimos 30 días. No se puede calcular la previsión.
+          </div>
+        </div>
+      </div>
+
+      <!-- Botón registrar movimiento -->
+      <button *ngIf="!mostrarFormMovimiento"
+        (click)="abrirFormMovimiento()"
+        class="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-2xl text-sm font-bold transition-all flex items-center justify-center gap-2">
+        ➕ Registrar Movimiento Manual
+      </button>
+
+      <!-- Formulario de movimiento -->
+      <div *ngIf="mostrarFormMovimiento"
+           class="bg-slate-800/60 border border-blue-500/30 rounded-2xl p-5 space-y-4">
+        <div class="flex justify-between items-center">
+          <p class="text-[10px] font-black uppercase tracking-widest text-blue-400">Nuevo Movimiento</p>
+          <button (click)="mostrarFormMovimiento = false" class="text-slate-500 hover:text-white transition-colors text-lg leading-none">×</button>
+        </div>
+
+        <!-- Tipo -->
+        <div>
+          <label class="text-xs text-slate-500 mb-2 block">Tipo</label>
+          <div class="flex gap-2">
+            <button *ngFor="let t of ['OUT', 'IN', 'ADJUSTMENT']"
+              (click)="setTipoMovimiento(t)"
+              [class]="nuevoMovimiento.type === t
+                ? 'flex-1 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ' + (t === 'IN' ? 'bg-emerald-500 text-white' : t === 'OUT' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white')
+                : 'flex-1 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all bg-slate-700/50 text-slate-400 hover:text-white'">
+              {{ t === 'IN' ? 'Entrada' : t === 'OUT' ? 'Salida' : 'Ajuste' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Cantidad -->
+        <div>
+          <label class="text-xs text-slate-500 mb-2 block">Cantidad</label>
+          <input type="number" [(ngModel)]="nuevoMovimiento.quantity" min="1"
+            class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors">
+        </div>
+
+        <!-- Motivo -->
+        <div>
+          <label class="text-xs text-slate-500 mb-2 block">Motivo</label>
+          <select [(ngModel)]="nuevoMovimiento.reason"
+            class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors mb-2">
+            <option *ngFor="let m of motivosDisponibles" [value]="m">{{ m }}</option>
+          </select>
+          <input type="text" [(ngModel)]="nuevoMovimiento.reason" placeholder="O escribe un motivo personalizado..."
+            class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors placeholder-slate-600">
+        </div>
+
+        <!-- Submit -->
+        <button (click)="guardarMovimiento()" [disabled]="enviando || nuevoMovimiento.quantity <= 0 || !nuevoMovimiento.reason.trim()"
+          class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2">
+          <span *ngIf="enviando" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block"></span>
+          {{ enviando ? 'Guardando...' : 'Guardar Movimiento' }}
+        </button>
+      </div>
+
+    </div>
+
+    <!-- COLUMNA DERECHA: Historial -->
+    <div class="lg:col-span-2">
+
+      <!-- Loading -->
+      <div *ngIf="cargandoHistorial" class="flex items-center justify-center py-20 gap-3 text-slate-400">
+        <span class="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin inline-block"></span>
+        Cargando historial...
+      </div>
+
+      <!-- Sin movimientos -->
+      <div *ngIf="!cargandoHistorial && historialFiltrado.length === 0"
+           class="border-2 border-dashed border-slate-700 rounded-2xl py-16 text-center">
+        <div class="text-3xl mb-3">🗂️</div>
+        <p class="text-slate-400 font-semibold">
+          {{ historial.length === 0 ? 'Sin movimientos registrados' : 'No hay movimientos de este tipo' }}
+        </p>
+        <p class="text-slate-600 text-sm mt-1">
+          {{ historial.length === 0 ? 'Los movimientos aparecerán aquí cuando se registren entradas o salidas' : 'Prueba con otro filtro' }}
+        </p>
+      </div>
+
+      <!-- Lista de movimientos -->
+      <div *ngIf="!cargandoHistorial && historialFiltrado.length > 0" class="space-y-2">
+        <p class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-4">
+          {{ historialFiltrado.length }} registro{{ historialFiltrado.length !== 1 ? 's' : '' }}
+        </p>
+
+        <div *ngFor="let mov of historialFiltrado"
+             class="bg-slate-800/60 border border-slate-700/50 rounded-xl px-5 py-4 flex items-center gap-4 hover:border-slate-600 transition-colors">
+
+          <!-- Badge tipo -->
+          <span class="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg border flex-shrink-0"
+                [class]="getBadgeClass(mov.type)">
+            {{ getBadgeLabel(mov.type) }}
+          </span>
+
+          <!-- Cantidad -->
+          <span class="text-xl font-black w-16 text-right flex-shrink-0"
+                [class]="getQuantityClass(mov.type)">
+            {{ getQuantityDisplay(mov) }}
+          </span>
+
+          <!-- Motivo -->
+          <span class="text-white text-sm flex-1 min-w-0 truncate">{{ mov.reason }}</span>
+
+          <!-- Metadata -->
+          <div class="text-right flex-shrink-0 space-y-0.5">
+            <p class="text-slate-400 text-xs">{{ mov.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
+            <p class="text-slate-600 text-xs">{{ mov.username || 'Sistema' }}</p>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

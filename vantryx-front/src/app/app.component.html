@@ -1,0 +1,164 @@
+<main class="min-h-screen w-full bg-[#0f172a] text-slate-200 flex justify-center p-4 md:p-10 font-sans">
+  <div class="w-full max-w-7xl">
+    
+    <app-login 
+      *ngIf="!isLogged" 
+      (onLoginSuccess)="manejarLogin($event)">
+    </app-login>
+
+    <div *ngIf="isLogged" class="animate-in fade-in duration-700">
+      
+      <header class="mb-12 flex flex-col md:flex-row justify-between items-center border-b border-slate-800 pb-8 gap-6">
+        <div>
+          <h1 class="text-5xl font-black text-blue-400 italic tracking-tighter">VANTRYX AI</h1>
+          <p class="text-slate-500 text-xs uppercase tracking-widest mt-1">Intelligence Dashboard v1.0</p>
+        </div>
+
+        <div class="flex items-center gap-3 bg-slate-900/50 px-4 py-2 rounded-full border border-slate-800">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-tighter">Sistema Sincronizado</span>
+        </div>
+      </header>
+
+      <div class="bg-[#0a0c10]/50 rounded-[3rem] border border-slate-800 p-4 md:p-8">
+        
+        <nav class="flex gap-8 mb-8 border-b border-slate-800 pb-2">
+          <button (click)="vistaActual = 'dashboard'; cargarDashboard()"
+            [class]="vistaActual === 'dashboard' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-slate-500 hover:text-slate-300'"
+            class="pb-2 font-black uppercase text-[10px] tracking-[0.2em] transition-all">
+            📊 Inicio
+          </button>
+          <button (click)="vistaActual = 'productos'" 
+            [class]="vistaActual === 'productos' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-slate-500 hover:text-slate-300'" 
+            class="pb-2 font-black uppercase text-[10px] tracking-[0.2em] transition-all">
+            📦 Inventario
+          </button>
+          <button (click)="vistaActual = 'proveedores'"
+            [class]="vistaActual === 'proveedores' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-slate-500 hover:text-slate-300'"
+            class="pb-2 font-black uppercase text-[10px] tracking-[0.2em] transition-all">
+            🏭 Proveedores
+          </button>
+          <button (click)="vistaActual = 'compras'"
+            [class]="vistaActual === 'compras' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-slate-500 hover:text-slate-300'"
+            class="pb-2 font-black uppercase text-[10px] tracking-[0.2em] transition-all">
+            🛒 Compras
+          </button>
+          <button (click)="vistaActual = 'movimientos'"
+            [class]="vistaActual === 'movimientos' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-slate-500 hover:text-slate-300'"
+            class="pb-2 font-black uppercase text-[10px] tracking-[0.2em] transition-all">
+            📋 Movimientos
+          </button>
+        </nav>
+
+        <div *ngIf="vistaActual === 'dashboard'" class="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+
+          <!-- Spinner de recarga silenciosa (no oculta el contenido, solo aparece arriba) -->
+          <div *ngIf="dashboardCargando" class="flex items-center gap-3 text-slate-500 text-xs mb-2">
+            <span class="w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin inline-block"></span>
+            Actualizando datos...
+          </div>
+
+          <section>
+            <div class="flex justify-between items-end mb-6">
+              <div>
+                <h2 class="text-2xl font-bold text-white tracking-tight">Categorías Globales</h2>
+                <p class="text-slate-500 text-sm">Selecciona una familia para gestionar sus productos</p>
+              </div>
+            </div>
+           
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div *ngFor="let cat of categories" 
+                  class="group relative bg-slate-900 p-8 rounded-3xl border border-slate-800 hover:border-emerald-500 transition-all cursor-pointer shadow-lg">
+                
+                <div (click)="irACategoria(cat.id)" class="flex flex-col items-center justify-center space-y-3">
+                  <div class="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                  </div>
+                  <span class="text-white font-medium text-lg">{{ cat.name }}</span>
+                </div>
+
+                <button *ngIf="cat.name.toLowerCase() !== 'general'"
+                        (click)="confirmarEliminarCategoria($event, cat)"
+                        class="absolute top-4 right-4 p-2 bg-rose-500/10 text-rose-500 rounded-xl opacity-0 group-hover:opacity-100 transition-all hover:bg-rose-500 hover:text-white">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+              <div class="bg-slate-800 p-8 rounded-[2rem] border border-slate-700">
+                <p class="text-slate-500 text-[10px] font-black uppercase mb-2">Valoración Total</p>
+                <h2 class="text-5xl font-bold text-white">{{ dashboardData.totalRevenue | currency:'EUR' }}</h2>
+              </div>
+              <div class="bg-slate-800 p-8 rounded-[2rem] border border-slate-700">
+                <p class="text-slate-500 text-[10px] font-black uppercase mb-2">Alertas</p>
+                <h2 class="text-5xl font-bold" [ngClass]="dashboardData.lowStockProducts.length > 0 ? 'text-red-400' : 'text-emerald-400'">
+                  {{ dashboardData.lowStockProducts.length }}
+                </h2>
+              </div>
+            </div>
+
+            <div class="bg-slate-800/40 rounded-[2rem] border border-slate-700 overflow-hidden">
+               <div class="p-8 border-b border-slate-700/50 bg-slate-900/30">
+                 <h3 class="text-xl font-bold text-white">Panel de Stock Crítico</h3>
+               </div>
+               <div *ngIf="dashboardData.lowStockProducts.length > 0; else todoOk" class="overflow-x-auto">
+                 <table class="w-full text-left">
+                   <tbody class="divide-y divide-slate-700/50">
+                     <tr *ngFor="let prod of dashboardData.lowStockProducts" class="hover:bg-slate-700/30">
+                       <td class="p-6 text-white font-bold">{{ prod.name }}</td>
+                       <td class="p-6 text-red-400 font-black">{{ prod.currentStock }} unid.</td>
+                       <td class="p-6 text-right">
+                         <button (click)="abrirModalReponer(prod)" class="bg-red-500 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase">Reponer</button>
+                       </td>
+                     </tr>
+                   </tbody>
+                 </table>
+               </div>
+               <ng-template #todoOk>
+                 <div class="py-20 text-center text-emerald-400 font-bold">✅ Inventario Optimizado</div>
+               </ng-template>
+            </div>
+          </section>
+        </div>
+
+        <app-inventario 
+          *ngIf="vistaActual === 'productos'"
+          [productos]="products"
+          [categorias]="categories"
+          [proveedores]="suppliers"
+          (productoModificado)="cargarDashboard()"> 
+          </app-inventario>
+
+       <div *ngIf="vistaActual === 'proveedores'">
+        <app-proveedores></app-proveedores>
+      </div>
+
+      <div *ngIf="vistaActual === 'compras'">
+        <app-compras (stockActualizado)="cargarDashboard()"></app-compras>
+      </div>
+
+      <div *ngIf="vistaActual === 'movimientos'">
+        <app-movimientos [productos]="products"></app-movimientos>
+      </div>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<app-purchase-order-modal
+  *ngIf="modalReponerAbierto"
+  [preselectedProduct]="productoParaReponer"
+  (orderCreated)="onOrdenCreadaDesdeReponer()"
+  (closed)="cerrarModalReponer()">
+</app-purchase-order-modal>

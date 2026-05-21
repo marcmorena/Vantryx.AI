@@ -1,0 +1,126 @@
+<div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+
+  <div class="flex justify-between items-center">
+    <div>
+      <h2 class="text-2xl font-bold text-white tracking-tight">Gestión de Compras</h2>
+      <p class="text-slate-500 text-sm mt-1">Órdenes activas y sugerencias de reposición</p>
+    </div>
+    <div class="flex gap-3">
+      <button (click)="abrirModal()"
+              class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-sm font-bold transition-all border border-slate-600">
+        + Nueva Orden
+      </button>
+      <button (click)="generarSugerencias()" [disabled]="cargando"
+              class="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white rounded-xl text-sm font-bold transition-all flex items-center gap-2">
+        <span *ngIf="!cargando">✨ Generar Sugerencias IA</span>
+        <span *ngIf="cargando" class="flex items-center gap-2">
+          <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block"></span>
+          Generando...
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+    <!-- BORRADORES / DRAFTS -->
+    <div>
+      <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-4">Borradores / Sugerencias IA</p>
+
+      <div *ngIf="ordenesPorEstado('DRAFT').length === 0"
+           class="border-2 border-dashed border-slate-700 rounded-2xl py-12 text-center text-slate-500 text-sm">
+        No hay sugerencias pendientes.
+      </div>
+
+      <div *ngFor="let order of ordenesPorEstado('DRAFT')"
+           class="bg-slate-800/60 border border-yellow-500/30 rounded-2xl p-5 mb-3">
+        <div class="flex justify-between items-start mb-3">
+          <h5 class="text-white font-bold">Sugerencia #{{order.id}}</h5>
+          <span class="text-[10px] font-black uppercase tracking-wider bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-lg">
+            Borrador
+          </span>
+        </div>
+        <p class="text-slate-300 text-sm mb-1">
+          <span class="text-slate-500">Proveedor:</span> {{order.supplierName}}
+        </p>
+        <p class="text-slate-500 text-xs mb-4">Generada por: {{order.username}}</p>
+
+        <div class="border-t border-slate-700 pt-3 mb-4 space-y-2">
+          <p class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Productos</p>
+          <div *ngFor="let item of order.items"
+               class="flex justify-between items-center text-sm bg-slate-900/40 rounded-xl px-3 py-2">
+            <span class="text-slate-200 font-medium">{{item.productName}}</span>
+            <div class="flex items-center gap-3 text-right">
+              <span class="text-slate-400">{{item.quantity}} ud.</span>
+              <span class="text-blue-300 font-semibold">{{item.priceAtPurchase | currency:'EUR'}}/ud.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-center pt-3 border-t border-slate-700">
+          <span class="text-blue-400 font-bold text-lg">{{order.totalAmount | currency:'EUR'}}</span>
+          <button (click)="confirmarPedido(order)"
+                  class="px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-white rounded-xl text-xs font-bold transition-all border border-emerald-500/30">
+            Confirmar Pedido →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EN CAMINO / ORDERED -->
+    <div>
+      <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-4">En Camino — Esperando Stock</p>
+
+      <div *ngIf="ordenesPorEstado('ORDERED').length === 0"
+           class="border-2 border-dashed border-slate-700 rounded-2xl py-12 text-center text-slate-500 text-sm">
+        No hay pedidos realizados actualmente.
+      </div>
+
+      <div *ngFor="let order of ordenesPorEstado('ORDERED')"
+           class="bg-slate-800/60 border border-blue-500/30 rounded-2xl p-5 mb-3">
+        <div class="flex justify-between items-start mb-3">
+          <h5 class="text-white font-bold">Pedido #{{order.id}}</h5>
+          <span class="text-[10px] font-black uppercase tracking-wider bg-blue-500/20 text-blue-400 px-2 py-1 rounded-lg">
+            Enviado
+          </span>
+        </div>
+        <p class="text-slate-300 text-sm mb-1">
+          <span class="text-slate-500">Proveedor:</span> {{order.supplierName}}
+        </p>
+        <p class="text-slate-500 text-xs mb-4">
+          Pedido el: {{order.orderDate | date:'dd/MM/yyyy HH:mm'}}
+        </p>
+
+        <div class="border-t border-slate-700 pt-3 mb-4 space-y-2">
+          <p class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Productos</p>
+          <div *ngFor="let item of order.items"
+               class="flex justify-between items-center text-sm bg-slate-900/40 rounded-xl px-3 py-2">
+            <span class="text-slate-200 font-medium">{{item.productName}}</span>
+            <div class="flex items-center gap-3 text-right">
+              <span class="text-slate-400">{{item.quantity}} ud.</span>
+              <span class="text-blue-300 font-semibold">{{item.priceAtPurchase | currency:'EUR'}}/ud.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-center border-t border-slate-700 pt-3 mb-4">
+          <span class="text-slate-500 text-xs">Total pedido</span>
+          <span class="text-blue-400 font-bold text-lg">{{order.totalAmount | currency:'EUR'}}</span>
+        </div>
+
+        <button (click)="confirmarRecepcion(order)"
+                class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-bold transition-all">
+          📦 Marcar como Recibido
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<app-purchase-order-modal
+  *ngIf="modalAbierto"
+  [preselectedProduct]="null"
+  (orderCreated)="onOrdenCreada($event)"
+  (closed)="cerrarModal()">
+</app-purchase-order-modal>

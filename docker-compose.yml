@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: 'postgres:latest'
+    container_name: vantryx-db-container
+    environment:
+      - 'POSTGRES_DB=vantryx_db'
+      - 'POSTGRES_USER=admin'
+      - 'POSTGRES_PASSWORD=admin'
+    ports:
+      - '5432:5432'
+    volumes:
+      # Cambiamos el destino del volumen para cumplir con la versión 18+
+      - vantryx_db_data:/var/lib/postgresql 
+
+volumes:
+  vantryx_db_data:
