@@ -46,10 +46,20 @@
             class="pb-2 font-black uppercase text-[10px] tracking-[0.2em] transition-all">
             🛒 Compras
           </button>
+          <button (click)="vistaActual = 'ventas'"
+            [class]="vistaActual === 'ventas' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-slate-500 hover:text-slate-300'"
+            class="pb-2 font-black uppercase text-[10px] tracking-[0.2em] transition-all">
+            💰 Ventas
+          </button>
           <button (click)="vistaActual = 'movimientos'"
             [class]="vistaActual === 'movimientos' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-slate-500 hover:text-slate-300'"
             class="pb-2 font-black uppercase text-[10px] tracking-[0.2em] transition-all">
             📋 Movimientos
+          </button>
+          <button (click)="vistaActual = 'reportes'"
+            [class]="vistaActual === 'reportes' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-slate-500 hover:text-slate-300'"
+            class="pb-2 font-black uppercase text-[10px] tracking-[0.2em] transition-all">
+            📊 Reportes
           </button>
         </nav>
 
@@ -149,6 +159,14 @@
 
       <div *ngIf="vistaActual === 'movimientos'">
         <app-movimientos [productos]="products"></app-movimientos>
+      </div>
+
+      <div *ngIf="vistaActual === 'reportes'">
+        <app-reportes [stats]="financialStats"></app-reportes>
+      </div>
+
+      <div *ngIf="vistaActual === 'ventas'">
+        <app-ventas [productos]="products"></app-ventas>
       </div>
 
       </div>

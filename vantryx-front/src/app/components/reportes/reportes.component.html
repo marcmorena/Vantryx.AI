@@ -1,0 +1,190 @@
+<div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+
+  <!-- CABECERA -->
+  <div>
+    <h2 class="text-2xl font-bold text-white tracking-tight">Reportes</h2>
+    <p class="text-slate-500 text-sm mt-1">Genera y descarga informes de inventario en formato Excel</p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- ── COLUMNA PRINCIPAL: Reporte de stock crítico ── -->
+    <div class="lg:col-span-2 space-y-4">
+
+      <div class="bg-slate-800/60 border border-slate-700 rounded-2xl overflow-hidden">
+
+        <!-- Cabecera tarjeta -->
+        <div class="px-6 pt-6 pb-4 border-b border-slate-700/60 flex items-start justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-3 mb-1">
+              <span class="text-2xl">📋</span>
+              <h3 class="text-white font-bold text-lg">Reporte de Stock Crítico</h3>
+            </div>
+            <p class="text-slate-500 text-sm">
+              Productos que han alcanzado o superado su stock mínimo
+            </p>
+          </div>
+          <!-- Badge con contador -->
+          <div *ngIf="stats" class="flex-shrink-0 text-center bg-red-500/10 border border-red-500/20 rounded-2xl px-4 py-3">
+            <p class="text-red-400 text-3xl font-black">{{ stats.criticalAlertsCount }}</p>
+            <p class="text-red-400/70 text-[10px] font-black uppercase tracking-wider">alertas</p>
+          </div>
+        </div>
+
+        <!-- Preview de productos en alerta -->
+        <div class="px-6 py-4">
+          <p class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3">
+            Vista previa del reporte
+          </p>
+
+          <!-- Sin alertas -->
+          <div *ngIf="stats && stats.criticalAlertsCount === 0"
+               class="py-10 text-center border border-dashed border-slate-700 rounded-xl">
+            <div class="text-3xl mb-2">✅</div>
+            <p class="text-emerald-400 font-semibold">Inventario en buen estado</p>
+            <p class="text-slate-600 text-sm mt-1">No hay productos por debajo del stock mínimo</p>
+          </div>
+
+          <!-- Tabla de alertas -->
+          <div *ngIf="stats && stats.criticalAlertsCount > 0"
+               class="border border-slate-700/50 rounded-xl overflow-hidden">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="bg-slate-900/60 border-b border-slate-700/50">
+                  <th class="text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500">Producto</th>
+                  <th class="text-center px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500">Stock</th>
+                  <th class="text-center px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500">Mínimo</th>
+                  <th class="text-center px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500">Estado</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-700/30">
+                <tr *ngFor="let prod of stats!.lowStockProducts"
+                    class="hover:bg-slate-700/20 transition-colors">
+                  <td class="px-4 py-3 text-white font-medium">{{ prod.name }}</td>
+                  <td class="px-4 py-3 text-center font-bold" [class]="getStockStatusClass(prod)">
+                    {{ prod.currentStock }}
+                  </td>
+                  <td class="px-4 py-3 text-center text-slate-400">{{ prod.minStock }}</td>
+                  <td class="px-4 py-3 text-center">{{ getStockStatusIcon(prod) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Cargando -->
+          <div *ngIf="!stats" class="space-y-2 py-2">
+            <div *ngFor="let i of [1,2,3]" class="h-10 bg-slate-700/30 rounded-xl animate-pulse"></div>
+          </div>
+        </div>
+
+        <!-- Footer con info y botón -->
+        <div class="px-6 pb-6 space-y-4">
+
+          <!-- Aviso de doble acción -->
+          <div class="bg-blue-500/10 border border-blue-500/20 rounded-xl px-4 py-3 flex items-start gap-3">
+            <span class="text-blue-400 text-lg flex-shrink-0">📧</span>
+            <p class="text-blue-300 text-xs leading-relaxed">
+              Al descargar, el reporte se envía <strong>automáticamente por email</strong>
+              a <span class="font-mono">admin&#64;vantryx.com</span> como copia de seguridad.
+            </p>
+          </div>
+
+          <!-- Feedback de estado -->
+          <div *ngIf="descargaExitosa"
+               class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-3 flex items-center gap-3 text-emerald-400 text-sm font-semibold">
+            <span>✅</span> Reporte descargado y email enviado correctamente.
+          </div>
+          <div *ngIf="errorDescarga"
+               class="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 flex items-center gap-3 text-red-400 text-sm font-semibold">
+            <span>❌</span> Error al generar el reporte. Comprueba la conexión con el servidor.
+          </div>
+
+          <!-- Botón de descarga -->
+          <button
+            (click)="descargarReporte()"
+            [disabled]="descargando"
+            class="w-full py-4 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-3">
+            <span *ngIf="descargando"
+                  class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+            <span *ngIf="!descargando">⬇️</span>
+            {{ descargando ? 'Generando reporte...' : 'Descargar Excel + Enviar Email' }}
+          </button>
+
+          <!-- Contenido del Excel -->
+          <div class="grid grid-cols-3 gap-2 pt-1">
+            <div *ngFor="let col of ['Producto · Stock · Mínimo', 'Proveedor · Estado', 'Sugerencia de compra']"
+                 class="bg-slate-900/40 rounded-lg px-3 py-2 text-center">
+              <p class="text-slate-500 text-[10px]">{{ col }}</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── COLUMNA LATERAL: Automatización ── -->
+    <div class="space-y-4">
+
+      <!-- Scheduler semanal -->
+      <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
+            🤖
+          </div>
+          <div>
+            <h4 class="text-white font-bold text-sm">Envío Automático</h4>
+            <p class="text-slate-500 text-xs">Sin intervención manual</p>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400 text-sm">Frecuencia</span>
+            <span class="text-white font-semibold text-sm">Semanal</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400 text-sm">Día</span>
+            <span class="text-white font-semibold text-sm">Lunes</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400 text-sm">Hora</span>
+            <span class="text-white font-semibold text-sm">08:00 AM</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400 text-sm">Destinatarios</span>
+            <span class="text-white font-semibold text-sm">Administradores</span>
+          </div>
+
+          <div class="pt-2 border-t border-slate-700">
+            <div class="flex items-center gap-2">
+              <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span class="text-emerald-400 text-xs font-bold">Scheduler activo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Qué incluye el reporte -->
+      <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-6">
+        <h4 class="text-white font-bold text-sm mb-4">📄 Contenido del Excel</h4>
+        <ul class="space-y-2">
+          <li *ngFor="let item of [
+            { icon: '📦', text: 'Nombre del producto' },
+            { icon: '📊', text: 'Stock actual vs. mínimo' },
+            { icon: '🏭', text: 'Proveedor asignado' },
+            { icon: '🚦', text: 'Estado (crítico / bajo)' },
+            { icon: '💡', text: 'Sugerencia de compra' }
+          ]" class="flex items-center gap-3 text-sm">
+            <span>{{ item.icon }}</span>
+            <span class="text-slate-400">{{ item.text }}</span>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+</div>

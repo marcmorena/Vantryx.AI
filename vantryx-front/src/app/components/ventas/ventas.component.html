@@ -1,0 +1,191 @@
+<div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+
+  <!-- CABECERA -->
+  <div>
+    <h2 class="text-2xl font-bold text-white tracking-tight">Ventas</h2>
+    <p class="text-slate-500 text-sm mt-1">Registra transacciones y consulta el rendimiento financiero</p>
+  </div>
+
+  <!-- MÉTRICAS FINANCIERAS -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+    <!-- Ingresos -->
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6">
+      <p class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Ingresos por Ventas</p>
+      <div *ngIf="cargandoStats" class="h-10 bg-slate-700 rounded-xl animate-pulse"></div>
+      <h3 *ngIf="!cargandoStats" class="text-4xl font-bold text-white">
+        {{ (stats?.totalRevenue ?? 0) | currency:'EUR' }}
+      </h3>
+    </div>
+
+    <!-- Inversión -->
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6">
+      <p class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Inversión en Compras</p>
+      <div *ngIf="cargandoStats" class="h-10 bg-slate-700 rounded-xl animate-pulse"></div>
+      <h3 *ngIf="!cargandoStats" class="text-4xl font-bold text-slate-300">
+        {{ (stats?.totalInvestment ?? 0) | currency:'EUR' }}
+      </h3>
+    </div>
+
+    <!-- Beneficio neto -->
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6">
+      <p class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Beneficio Neto</p>
+      <div *ngIf="cargandoStats" class="h-10 bg-slate-700 rounded-xl animate-pulse"></div>
+      <h3 *ngIf="!cargandoStats" class="text-4xl font-bold" [class]="getNetProfitClass()">
+        {{ (stats?.netProfit ?? 0) | currency:'EUR' }}
+      </h3>
+    </div>
+
+  </div>
+
+  <!-- CUERPO PRINCIPAL: formulario + historial -->
+  <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+
+    <!-- ── FORMULARIO DE VENTA ── -->
+    <div class="lg:col-span-2 space-y-4">
+      <p class="text-[10px] font-black uppercase tracking-widest text-slate-500">Registrar Venta</p>
+
+      <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 space-y-5">
+
+        <!-- Selector de producto -->
+        <div>
+          <label class="text-xs text-slate-400 mb-2 block">Producto</label>
+          <select
+            [(ngModel)]="productoSeleccionadoId"
+            (ngModelChange)="onProductoChange()"
+            class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-colors">
+            <option [ngValue]="null" disabled>-- Selecciona un producto --</option>
+            <option *ngFor="let p of productos" [ngValue]="p.id">
+              {{ p.name }}
+              <span *ngIf="p.currentStock <= p.minStock"> ⚠️</span>
+            </option>
+          </select>
+        </div>
+
+        <!-- Info del producto seleccionado -->
+        <div *ngIf="productoActual"
+             class="bg-slate-900/60 rounded-xl px-4 py-3 flex justify-between items-center text-sm">
+          <span class="text-slate-400">Stock disponible</span>
+          <span class="font-bold"
+            [ngClass]="productoActual.currentStock <= productoActual.minStock ? 'text-red-400' : 'text-emerald-400'">
+            {{ productoActual.currentStock }} ud.
+          </span>
+        </div>
+
+        <!-- Predicción IA -->
+        <div *ngIf="cargandoPrediccion" class="h-10 bg-slate-700/50 rounded-xl animate-pulse"></div>
+        <div *ngIf="prediccion && !cargandoPrediccion"
+             class="rounded-xl px-4 py-3 text-xs font-semibold flex items-center gap-2"
+             [class]="getPredictionBadgeClass()">
+          <span>{{ getPredictionIcon() }}</span>
+          <span>{{ getPredictionLabel() }}</span>
+        </div>
+
+        <!-- Cantidad -->
+        <div>
+          <label class="text-xs text-slate-400 mb-2 block">Cantidad</label>
+          <div class="flex items-center gap-3">
+            <button (click)="cantidad = cantidad > 1 ? cantidad - 1 : 1"
+              class="w-10 h-10 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-bold text-lg transition-colors flex items-center justify-center">
+              −
+            </button>
+            <input type="number" [(ngModel)]="cantidad" min="1"
+              [max]="productoActual?.currentStock ?? 9999"
+              class="flex-1 bg-slate-900 border border-slate-700 text-white text-center rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors">
+            <button (click)="cantidad = cantidad + 1"
+              [disabled]="!!productoActual && cantidad >= productoActual.currentStock"
+              class="w-10 h-10 bg-slate-700 hover:bg-slate-600 disabled:opacity-40 text-white rounded-xl font-bold text-lg transition-colors flex items-center justify-center">
+              +
+            </button>
+          </div>
+          <p *ngIf="stockInsuficiente" class="text-red-400 text-xs mt-2">
+            ⚠️ Stock insuficiente. Máximo {{ productoActual?.currentStock }} unidades.
+          </p>
+        </div>
+
+        <!-- Resumen precio -->
+        <div *ngIf="productoActual" class="border-t border-slate-700 pt-4 space-y-2">
+          <div class="flex justify-between text-sm">
+            <span class="text-slate-400">Precio unitario</span>
+            <span class="text-slate-300">{{ productoActual.salePrice | currency:'EUR' }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400 text-sm">Total</span>
+            <span class="text-white text-xl font-bold">{{ totalVenta | currency:'EUR' }}</span>
+          </div>
+        </div>
+
+        <!-- Botón registrar -->
+        <button
+          (click)="registrarVenta()"
+          [disabled]="!productoSeleccionadoId || cantidad <= 0 || stockInsuficiente || enviando"
+          class="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2">
+          <span *ngIf="enviando" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+          {{ enviando ? 'Registrando...' : '💰 Registrar Venta' }}
+        </button>
+
+      </div>
+    </div>
+
+    <!-- ── HISTORIAL DE VENTAS ── -->
+    <div class="lg:col-span-3">
+      <div class="flex justify-between items-center mb-4">
+        <p class="text-[10px] font-black uppercase tracking-widest text-slate-500">
+          Historial de Ventas
+        </p>
+        <span *ngIf="!cargandoVentas && ventas.length > 0"
+              class="text-[10px] text-slate-600 font-semibold uppercase tracking-wider">
+          {{ ventas.length }} registro{{ ventas.length !== 1 ? 's' : '' }}
+        </span>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="cargandoVentas" class="space-y-2">
+        <div *ngFor="let i of [1,2,3,4,5]" class="h-14 bg-slate-800/40 rounded-xl animate-pulse"></div>
+      </div>
+
+      <!-- Sin ventas -->
+      <div *ngIf="!cargandoVentas && ventas.length === 0"
+           class="border-2 border-dashed border-slate-700 rounded-2xl py-20 text-center">
+        <div class="text-4xl mb-3">💸</div>
+        <p class="text-slate-400 font-semibold">Sin ventas registradas</p>
+        <p class="text-slate-600 text-sm mt-1">Las ventas aparecerán aquí al registrarlas</p>
+      </div>
+
+      <!-- Lista -->
+      <div *ngIf="!cargandoVentas && ventas.length > 0" class="space-y-2">
+        <div *ngFor="let venta of ventas"
+             class="bg-slate-800/60 border border-slate-700/50 hover:border-slate-600 rounded-xl px-5 py-4 flex items-center gap-4 transition-colors">
+
+          <!-- Indicador -->
+          <div class="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0"></div>
+
+          <!-- Producto -->
+          <div class="flex-1 min-w-0">
+            <p class="text-white font-semibold text-sm truncate">{{ venta.productName ?? 'Producto #' + venta.productId }}</p>
+            <p class="text-slate-500 text-xs">{{ venta.createdAt | date:'dd/MM/yyyy · HH:mm' }}</p>
+          </div>
+
+          <!-- Unidades -->
+          <div class="text-center flex-shrink-0">
+            <p class="text-slate-300 font-bold text-sm">×{{ venta.quantity }}</p>
+            <p class="text-slate-600 text-xs">ud.</p>
+          </div>
+
+          <!-- Precio unitario -->
+          <div class="text-right flex-shrink-0 hidden sm:block">
+            <p class="text-slate-400 text-xs">{{ venta.unitPrice | currency:'EUR' }}/ud.</p>
+          </div>
+
+          <!-- Total -->
+          <div class="text-right flex-shrink-0">
+            <p class="text-emerald-400 font-bold">{{ venta.totalAmount | currency:'EUR' }}</p>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

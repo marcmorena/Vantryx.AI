@@ -13,11 +13,15 @@ import { ProveedoresComponent } from './components/proveedores/proveedores.compo
 import { ComprasComponent } from './components/compras/compras.component';
 import { PurchaseOrderModalComponent } from './components/purchase-order-modal/purchase-order-modal.component';
 import { MovimientosComponent } from './components/movimientos/movimientos.component';
+import { VentasComponent } from './components/ventas/ventas.component';
+import { ReportesComponent } from './components/reportes/reportes.component';
+import { SaleService } from './services/sale.service';
+import { DashboardStatsDTO } from './models/sale.model';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [LoginComponent, InventarioComponent, ProveedoresComponent, ComprasComponent, PurchaseOrderModalComponent, MovimientosComponent, CommonModule, CurrencyPipe, DatePipe, FormsModule],
+  imports: [LoginComponent, InventarioComponent, ProveedoresComponent, ComprasComponent, PurchaseOrderModalComponent, MovimientosComponent, VentasComponent, ReportesComponent, CommonModule, CurrencyPipe, DatePipe, FormsModule],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
@@ -25,10 +29,11 @@ export class AppComponent implements OnInit {
   private productService = inject(ProductService);
   private categoryService = inject(CategoryService);
   private supplierService = inject(SupplierService);
+  private saleService = inject(SaleService);
   private cdr = inject(ChangeDetectorRef);
 
   // ESTADO GLOBAL
-  public vistaActual: 'dashboard' | 'productos' | 'proveedores' | 'compras' | 'movimientos' = 'dashboard';
+  public vistaActual: 'dashboard' | 'productos' | 'proveedores' | 'compras' | 'ventas' | 'movimientos' | 'reportes' = 'dashboard';
   public isLoading = true;
   public isLogged: boolean = false;
   public usuarioActivo: any = null;
@@ -46,7 +51,8 @@ export class AppComponent implements OnInit {
     lowStockProducts: [] as any[]
   };
 
-  public dashboardCargando = false; // Spinner exclusivo del dashboard, no bloquea otras vistas
+  public dashboardCargando = false;
+  public financialStats: DashboardStatsDTO | null = null; // Para Reportes y Ventas
 
   public modalReponerAbierto = false;
   public productoParaReponer: ProductDTO | null = null;
@@ -87,6 +93,16 @@ export class AppComponent implements OnInit {
         this.isLoading = false;
         this.cdr.detectChanges();
       }
+    });
+  }
+
+  cargarStats() {
+    this.saleService.getStats().subscribe({
+      next: (data) => {
+        this.financialStats = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error cargando stats financieros:', err)
     });
   }
 
@@ -200,6 +216,7 @@ confirmarEliminarCategoria(event: Event, catABorrar: any) {
     this.cargarDashboard();
     this.cargarListasAuxiliares();
     this.cargarCategorias();
+    this.cargarStats();
   }
 
   getCountByCategoria(categoriaId: number): number {
