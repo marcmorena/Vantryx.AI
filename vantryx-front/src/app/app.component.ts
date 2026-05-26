@@ -15,13 +15,14 @@ import { PurchaseOrderModalComponent } from './components/purchase-order-modal/p
 import { MovimientosComponent } from './components/movimientos/movimientos.component';
 import { VentasComponent } from './components/ventas/ventas.component';
 import { ReportesComponent } from './components/reportes/reportes.component';
+import { AsistenteIaComponent } from './components/asistente-ia/asistente-ia.component';
 import { SaleService } from './services/sale.service';
 import { DashboardStatsDTO } from './models/sale.model';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [LoginComponent, InventarioComponent, ProveedoresComponent, ComprasComponent, PurchaseOrderModalComponent, MovimientosComponent, VentasComponent, ReportesComponent, CommonModule, CurrencyPipe, DatePipe, FormsModule],
+  imports: [LoginComponent, InventarioComponent, ProveedoresComponent, ComprasComponent, PurchaseOrderModalComponent, MovimientosComponent, VentasComponent, ReportesComponent, AsistenteIaComponent, CommonModule, CurrencyPipe, DatePipe, FormsModule],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
@@ -34,6 +35,7 @@ export class AppComponent implements OnInit {
 
   // ESTADO GLOBAL
   public vistaActual: 'dashboard' | 'productos' | 'proveedores' | 'compras' | 'ventas' | 'movimientos' | 'reportes' = 'dashboard';
+  public panelIaAbierto = false;
   public isLoading = true;
   public isLogged: boolean = false;
   public usuarioActivo: any = null;

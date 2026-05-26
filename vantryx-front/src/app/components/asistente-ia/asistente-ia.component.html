@@ -1,0 +1,209 @@
+<!-- ══════════════════════════════════════════════════
+     CABECERA DEL PANEL
+     ══════════════════════════════════════════════════ -->
+<div class="flex items-center justify-between px-6 py-5 border-b border-slate-700/60 flex-shrink-0">
+  <div class="flex items-center gap-3">
+    <div class="w-9 h-9 rounded-xl bg-violet-500/15 flex items-center justify-center text-lg">🤖</div>
+    <div>
+      <div class="flex items-center gap-2">
+        <h2 class="text-white font-bold text-base leading-none">Asistente IA</h2>
+        <span class="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 bg-violet-500/20 text-violet-400 border border-violet-500/30 rounded-md">
+          phi3
+        </span>
+      </div>
+      <p class="text-slate-500 text-xs mt-0.5">Análisis prescriptivo de inventario</p>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <!-- Botón historial -->
+    <button *ngIf="historial.length > 0"
+      (click)="mostrarHistorial = !mostrarHistorial"
+      class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-lg text-xs font-bold transition-all">
+      🕑
+      <span class="bg-violet-500/30 text-violet-400 rounded-full w-4 h-4 flex items-center justify-center text-[9px] font-black">
+        {{ historial.length }}
+      </span>
+    </button>
+
+    <!-- Botón cerrar -->
+    <button (click)="cerrar.emit()"
+      class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-white hover:bg-slate-700 transition-all text-lg leading-none">
+      ×
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     CUERPO SCROLLABLE
+     ══════════════════════════════════════════════════ -->
+<div class="flex-1 overflow-y-auto p-6 space-y-5">
+
+  <!-- Panel historial desplegable -->
+  <div *ngIf="mostrarHistorial && historial.length > 0"
+       class="bg-slate-800/60 border border-slate-700 rounded-xl p-4 space-y-1">
+    <p class="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2">Sesión actual</p>
+    <div *ngFor="let item of historial"
+         (click)="cargarDesdeHistorial(item)"
+         class="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-slate-700/50 cursor-pointer transition-colors border border-transparent hover:border-slate-600">
+      <div class="flex items-center gap-2">
+        <span class="text-violet-400 text-xs">✨</span>
+        <span class="text-white text-xs font-semibold">{{ item.productoNombre }}</span>
+        <span class="text-slate-500 text-[10px]">{{ item.timestamp | date:'HH:mm' }}</span>
+      </div>
+      <span class="text-slate-600 text-[10px]">{{ item.duracionSegundos }}s</span>
+    </div>
+  </div>
+
+  <!-- ── Selector de producto ── -->
+  <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-4 space-y-4">
+    <p class="text-[9px] font-black uppercase tracking-widest text-slate-500">Producto a analizar</p>
+
+    <select [(ngModel)]="productoSeleccionadoId"
+      class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors">
+      <option [ngValue]="null" disabled>— Selecciona un producto —</option>
+      <option *ngFor="let p of productos" [ngValue]="p.id">{{ p.name }}</option>
+    </select>
+
+    <!-- Ficha del producto -->
+    <div *ngIf="productoActual" class="space-y-2 pt-3 border-t border-slate-700">
+      <p class="text-[9px] font-black uppercase tracking-widest text-slate-500">Datos que verá la IA</p>
+      <div class="space-y-1.5">
+        <div class="flex justify-between items-center text-xs">
+          <span class="text-slate-500">Stock actual</span>
+          <span class="font-bold"
+            [ngClass]="productoActual.currentStock <= productoActual.minStock ? 'text-red-400' : 'text-emerald-400'">
+            {{ productoActual.currentStock }} ud.
+          </span>
+        </div>
+        <div class="flex justify-between items-center text-xs">
+          <span class="text-slate-500">P. Compra</span>
+          <span class="text-slate-300 font-semibold">{{ productoActual.purchasePrice | currency:'EUR' }}</span>
+        </div>
+        <div class="flex justify-between items-center text-xs">
+          <span class="text-slate-500">P. Venta</span>
+          <span class="text-slate-300 font-semibold">{{ productoActual.salePrice | currency:'EUR' }}</span>
+        </div>
+        <div class="flex justify-between items-center text-xs">
+          <span class="text-slate-500">Margen bruto</span>
+          <span class="text-violet-400 font-bold">{{ margenBruto }}</span>
+        </div>
+        <div class="flex justify-between items-center text-xs">
+          <span class="text-slate-500">Lead time</span>
+          <span class="text-slate-300 font-semibold">{{ productoActual.leadTime }} días</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Info del motor ── -->
+  <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+    <div class="flex items-center gap-3">
+      <div class="w-7 h-7 rounded-lg bg-violet-500/10 flex items-center justify-center text-sm">🦙</div>
+      <div class="flex-1 min-w-0">
+        <p class="text-white text-xs font-bold">Ollama · phi3</p>
+        <p class="text-slate-600 text-[10px]">Ejecutándose en local · sin datos en la nube</p>
+      </div>
+      <span class="relative flex h-2 w-2 flex-shrink-0">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-2 w-2 bg-violet-500"></span>
+      </span>
+    </div>
+  </div>
+
+  <!-- ── Estado: cargando ── -->
+  <div *ngIf="analizando"
+       class="bg-slate-800/60 border border-violet-500/30 rounded-xl p-6 flex flex-col items-center text-center gap-4">
+    <div class="flex gap-1.5">
+      <span class="w-2.5 h-2.5 bg-violet-400 rounded-full animate-bounce" style="animation-delay: 0ms"></span>
+      <span class="w-2.5 h-2.5 bg-violet-400 rounded-full animate-bounce" style="animation-delay: 150ms"></span>
+      <span class="w-2.5 h-2.5 bg-violet-400 rounded-full animate-bounce" style="animation-delay: 300ms"></span>
+    </div>
+    <div>
+      <p class="text-violet-300 font-bold text-sm mb-1">Consultando phi3...</p>
+      <p class="text-slate-500 text-xs">Analizando <span class="text-white font-semibold">{{ productoActual?.name }}</span></p>
+    </div>
+    <div class="bg-slate-900/80 border border-slate-700 rounded-lg px-5 py-2.5">
+      <p class="text-slate-400 text-[10px] mb-0.5">Tiempo transcurrido</p>
+      <p class="text-violet-400 font-black text-xl font-mono">{{ timerLabel }}</p>
+    </div>
+    <p class="text-slate-700 text-[10px] max-w-[200px]">
+      Los modelos locales pueden tardar entre 15 y 60 segundos
+    </p>
+  </div>
+
+  <!-- ── Estado: error ── -->
+  <div *ngIf="!analizando && error"
+       class="bg-red-500/5 border border-red-500/20 rounded-xl p-5 flex flex-col items-center text-center gap-3">
+    <div class="text-3xl">⚠️</div>
+    <p class="text-red-400 font-semibold text-sm">{{ error }}</p>
+    <div class="text-slate-500 text-xs space-y-1">
+      <p>Asegúrate de que <span class="font-mono text-slate-400">ollama</span> está activo:</p>
+      <code class="bg-slate-900 px-3 py-1 rounded-lg text-slate-300 text-xs block">ollama run phi3</code>
+    </div>
+    <button (click)="consultar()"
+            class="px-4 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-xs font-bold transition-all">
+      Reintentar
+    </button>
+  </div>
+
+  <!-- ── Respuesta del LLM ── -->
+  <div *ngIf="!analizando && respuestaActual"
+       class="bg-slate-800/60 border border-violet-500/20 rounded-xl overflow-hidden">
+
+    <div class="px-4 py-3 border-b border-slate-700/50 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-6 h-6 bg-violet-500/20 rounded-md flex items-center justify-center text-xs">✨</div>
+        <div>
+          <p class="text-white font-bold text-xs">{{ productoActual?.name }}</p>
+          <p class="text-slate-500 text-[10px]">phi3 · {{ historial[0]?.duracionSegundos }}s</p>
+        </div>
+      </div>
+      <button (click)="limpiar()"
+              class="text-slate-600 hover:text-slate-400 transition-colors text-lg leading-none w-6 h-6 flex items-center justify-center">×</button>
+    </div>
+
+    <div class="px-4 py-4">
+      <div class="text-slate-300 text-xs leading-relaxed"
+           [innerHTML]="'<p class=\'mb-3\'>' + respuestaFormateada + '</p>'">
+      </div>
+    </div>
+
+    <div class="px-4 py-3 border-t border-slate-700/50 flex items-center justify-between">
+      <p class="text-slate-600 text-[10px]">✅ Vantryx AI</p>
+      <button (click)="consultar()"
+              class="px-3 py-1.5 bg-violet-500/10 hover:bg-violet-500/20 text-violet-400 border border-violet-500/20 rounded-lg text-[10px] font-bold transition-all">
+        🔄 Regenerar
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Estado: vacío ── -->
+  <div *ngIf="!analizando && !respuestaActual && !error"
+       class="border border-dashed border-slate-700 rounded-xl py-12 flex flex-col items-center justify-center text-center px-6">
+    <div class="text-5xl mb-3 opacity-20">🤖</div>
+    <p class="text-slate-500 font-semibold text-sm">El análisis aparecerá aquí</p>
+    <p class="text-slate-700 text-xs mt-1.5 max-w-[220px]">
+      Selecciona un producto y pulsa el botón para obtener un análisis de phi3
+    </p>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     PIE FIJO: BOTÓN CONSULTAR
+     ══════════════════════════════════════════════════ -->
+<div class="px-6 py-4 border-t border-slate-700/60 flex-shrink-0">
+  <button
+    (click)="consultar()"
+    [disabled]="!productoSeleccionadoId || analizando"
+    class="w-full py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2
+           bg-violet-600 hover:bg-violet-500 disabled:opacity-40 disabled:cursor-not-allowed text-white
+           shadow-lg shadow-violet-900/40">
+    <span *ngIf="!analizando">✨ Consultar al Asistente IA</span>
+    <span *ngIf="analizando" class="flex items-center gap-2">
+      <span class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+      Generando análisis...
+    </span>
+  </button>
+</div>

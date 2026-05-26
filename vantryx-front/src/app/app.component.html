@@ -14,12 +14,26 @@
           <p class="text-slate-500 text-xs uppercase tracking-widest mt-1">Intelligence Dashboard v1.0</p>
         </div>
 
-        <div class="flex items-center gap-3 bg-slate-900/50 px-4 py-2 rounded-full border border-slate-800">
-          <span class="relative flex h-2 w-2">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-          </span>
-          <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-tighter">Sistema Sincronizado</span>
+        <div class="flex items-center gap-3">
+          <!-- Botón Asistente IA -->
+          <button (click)="panelIaAbierto = true"
+            class="flex items-center gap-2 px-4 py-2 rounded-full border border-violet-500/40 bg-violet-500/10 hover:bg-violet-500/20 text-violet-400 transition-all text-[10px] font-black uppercase tracking-widest group">
+            <span class="text-sm">🤖</span>
+            Asistente IA
+            <span class="relative flex h-1.5 w-1.5">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-violet-500"></span>
+            </span>
+          </button>
+
+          <!-- Sistema sincronizado -->
+          <div class="flex items-center gap-3 bg-slate-900/50 px-4 py-2 rounded-full border border-slate-800">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-tighter">Sistema Sincronizado</span>
+          </div>
         </div>
       </header>
 
@@ -173,6 +187,28 @@
     </div>
   </div>
 </main>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE-OVER: ASISTENTE IA
+     ══════════════════════════════════════════════════ -->
+<ng-container *ngIf="panelIaAbierto">
+
+  <!-- Overlay -->
+  <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 animate-in fade-in duration-200"
+       (click)="panelIaAbierto = false">
+  </div>
+
+  <!-- Panel -->
+  <div class="fixed top-0 right-0 h-full w-full max-w-[440px] bg-[#0f172a] border-l border-slate-700/80
+              z-50 flex flex-col shadow-2xl shadow-black/60
+              animate-in slide-in-from-right duration-300">
+    <app-asistente-ia
+      [productos]="products"
+      (cerrar)="panelIaAbierto = false">
+    </app-asistente-ia>
+  </div>
+
+</ng-container>
 
 <app-purchase-order-modal
   *ngIf="modalReponerAbierto"
