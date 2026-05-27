@@ -52,8 +52,7 @@ export class VentasComponent implements OnInit {
         this.cargandoStats = false;
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('Error cargando estadísticas:', err);
+      error: () => {
         this.cargandoStats = false;
         this.cdr.detectChanges();
       }
@@ -68,8 +67,7 @@ export class VentasComponent implements OnInit {
         this.cargandoVentas = false;
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('Error cargando historial de ventas:', err);
+      error: () => {
         this.cargandoVentas = false;
         this.cdr.detectChanges();
       }
@@ -139,7 +137,6 @@ export class VentasComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error registrando venta:', err);
         const msg = err?.error?.message ?? 'Error al registrar la venta. Verifica el stock disponible.';
         alert(msg);
         this.enviando = false;

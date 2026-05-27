@@ -2,11 +2,12 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Supplier } from '../models/supplier.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class SupplierService {
   private http = inject(HttpClient);
-  private url = 'http://localhost:8080/api/v1/suppliers';
+  private url = `${environment.apiBaseUrl}/api/v1/suppliers`;
 
   getAll(): Observable<Supplier[]> {
     return this.http.get<Supplier[]>(this.url); 

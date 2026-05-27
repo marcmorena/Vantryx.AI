@@ -56,8 +56,7 @@ export class ReportesComponent {
           this.cdr.detectChanges();
         }, 5000);
       },
-      error: (err) => {
-        console.error('Error al descargar el reporte:', err);
+      error: () => {
         this.descargando = false;
         this.errorDescarga = true;
         this.cdr.detectChanges();

@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Credenciales y configuración sensible ###
+src/main/resources/application-local.properties
+*.env
+.env

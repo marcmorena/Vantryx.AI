@@ -2,6 +2,7 @@ import { Component, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -26,7 +27,7 @@ export class LoginComponent {
     }
     this.loading = true;
     this.error = '';
-    this.http.post<{ token: string }>('http://localhost:8080/api/auth/login', {
+    this.http.post<{ token: string }>(`${environment.apiBaseUrl}/api/auth/login`, {
       username: this.username,
       password: this.password
     }).subscribe({

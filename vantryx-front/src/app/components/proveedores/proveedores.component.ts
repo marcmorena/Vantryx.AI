@@ -44,7 +44,7 @@ export class ProveedoresComponent implements OnInit {
       this.suppliers = [...data]; 
       this.cdr.detectChanges(); // Forzamos a Angular a pintar la lista
     },
-    error: (err) => console.error('Error cargando proveedores', err)
+    error: () => {}
   });
 }
 
@@ -79,7 +79,6 @@ export class ProveedoresComponent implements OnInit {
         // IMPORTANTE: No hagas "push" manual. 
         // Deja que finalizarAccionProveedor refresque la lista desde la DB.
         this.finalizarAccionProveedor();
-        console.log('✅ Proveedor creado correctamente');
       },
       error: () => alert('Error al guardar')
     });
@@ -109,7 +108,7 @@ export class ProveedoresComponent implements OnInit {
     this.cdr.detectChanges();
 
     this.supplierService.delete(idABorrar).subscribe({
-      next: () => console.log('✅ Borrado confirmado'),
+      next: () => {},
       error: (err) => {
         alert('No se pudo borrar: El proveedor tiene productos vinculados.');
         this.cargarProveedores();

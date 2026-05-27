@@ -2,12 +2,13 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, tap } from 'rxjs';
 import { CategoryDTO } from '../models/category.model';
-import { Subject } from 'rxjs'; // Añade esta importación
+import { Subject } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class CategoryService {
   private http = inject(HttpClient);
-  private url = 'http://localhost:8080/api/categories';
+  private url = `${environment.apiBaseUrl}/api/categories`;
   // Alarma para avisar que hay categorías nuevas
   private _refreshNeeded$ = new Subject<void>();
 

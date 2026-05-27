@@ -112,7 +112,6 @@ ngOnInit(): void {
   // 2. Escuchamos el cambio de categoría
   this.categoryService.categoriaSeleccionada$.subscribe(id => {
     this.filtroCategoria = id; 
-    console.log('Inventario detecta cambio de categoría:', id);
 
     // 3. El secreto está aquí:
     setTimeout(() => {
@@ -126,7 +125,6 @@ ngOnInit(): void {
         // Forzamos a Angular a que examine la vista ahora mismo
         this.cdr.detectChanges();
         
-        console.log('Productos actualizados y vista refrescada');
       });
     }, 300); 
   });
@@ -164,7 +162,6 @@ prepararNuevoProducto() {
 guardarProducto() {
   // 1. Verificación robusta
   if (!this.nuevoProducto.name || !this.nuevoProducto.categoryId) {
-    console.warn('⚠️ No se puede guardar: Nombre y Categoría son obligatorios.');
     return;
   }
 
@@ -199,8 +196,7 @@ guardarProducto() {
 
 // --- Funciones auxiliares para mantener el código limpio ---
 
-private finalizarOperacion(accion: string) {
-  console.log(`✅ Producto ${accion} exitosamente`);
+private finalizarOperacion(_accion: string) {
   
   this.mostrarModalProducto = false;
   this.editandoProducto = false; // Importante resetear este flag
@@ -212,7 +208,6 @@ private finalizarOperacion(accion: string) {
 }
 
 private manejarError(err: any) {
-  console.error('❌ Error en el servidor:', err);
   if(err.status === 403) {
     alert('No tienes permisos para realizar esta acción.');
   } else {
@@ -254,8 +249,6 @@ resetNuevoProducto() {
     motivo: cantidad > 0 ? 'Entrada rápida' : 'Salida rápida'
   };
 
-  console.log('⚡ Ajuste rápido procesado:', log);
-  
   // Aquí podrías llamar a un servicio para guardar en BD
   // this.productService.updateStock(producto.id, nuevoStock, log).subscribe();
   }
@@ -293,11 +286,8 @@ resetNuevoProducto() {
     reason: this.motivoAjuste
   };
 
-  console.log('Enviando a Java:', movimientoKardex);
-
   this.inventoryService.registrarMovimiento(movimientoKardex).subscribe({
-    next: (res) => {
-      console.log('✅ Respuesta del servidor:', res);
+    next: () => {
       this.productoSeleccionado.currentStock = nuevoStock;
       this.mostrarModalAjuste = false;
       this.cantidadAjuste = 0;
@@ -305,7 +295,6 @@ resetNuevoProducto() {
       this.cdr.detectChanges();
     },
     error: (err) => {
-      console.error('❌ Error detallado:', err);
       if (err.status === 403 || err.status === 401) {
         alert('🚫 Error de Seguridad: No tienes permisos (ADMIN) o falta el token.');
       } else {
@@ -354,7 +343,6 @@ crearNuevaCategoria() {
       // 3. Limpiamos y cerramos el mini-formulario
       this.nombreNuevaCategoria = '';
       this.mostrandoFormCategoria = false;
-      console.log('Categoría creada y seleccionada');
     },
     error: (err) => alert('Error al crear la categoría')
   });
@@ -363,7 +351,6 @@ crearNuevaCategoria() {
 sincronizarFiltro() {
   // Le avisamos al servicio del nuevo cambio manual
   this.categoryService.setCategoriaSeleccionada(this.filtroCategoria);
-  console.log('Sincronizando filtro manual:', this.filtroCategoria);
 }
 
 }

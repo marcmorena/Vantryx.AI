@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { MovementResponseDTO, StockMovementRequestDTO } from '../models/movement.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class InventoryService {
-  private baseUrl = 'http://localhost:8080/api/inventory';
+  private baseUrl = `${environment.apiBaseUrl}/api/inventory`;
 
   constructor(private http: HttpClient) { }
 

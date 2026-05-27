@@ -115,8 +115,7 @@ export class MovimientosComponent implements OnChanges {
         this.cargandoHistorial = false;
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('Error cargando historial:', err);
+      error: () => {
         this.cargandoHistorial = false;
         this.cdr.detectChanges();
       }
@@ -151,8 +150,7 @@ export class MovimientosComponent implements OnChanges {
         this.cargarHistorial(); // Recargamos el historial para reflejar el nuevo movimiento
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('Error registrando movimiento:', err);
+      error: () => {
         alert('Error al registrar el movimiento. Comprueba que el stock no quede negativo.');
         this.enviando = false;
         this.cdr.detectChanges();

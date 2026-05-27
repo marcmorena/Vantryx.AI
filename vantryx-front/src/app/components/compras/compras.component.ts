@@ -35,8 +35,7 @@ export class ComprasComponent implements OnInit {
         this.cargando = false;
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error(err);
+      error: () => {
         this.cargando = false;
         this.cdr.detectChanges();
       }
@@ -95,9 +94,8 @@ export class ComprasComponent implements OnInit {
 
   confirmarPedido(order: PurchaseOrderResponseDTO) {
     this.poService.confirmOrder(order.id).subscribe({
-      next: (actualizada) => {
+      next: () => {
         this.listarPendientes();
-        console.log('Pedido confirmado:', actualizada.id);
       },
       error: (err) => {
         this.cdr.detectChanges();

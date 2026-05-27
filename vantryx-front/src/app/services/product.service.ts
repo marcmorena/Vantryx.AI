@@ -2,21 +2,15 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ProductDTO } from '../models/product.model';
-import { tap } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
   private http = inject(HttpClient);
-  private url = 'http://localhost:8080/api/products';
+  private url = `${environment.apiBaseUrl}/api/products`;
 
 getAllProducts(): Observable<ProductDTO[]> {
-  return this.http.get<ProductDTO[]>(this.url).pipe(
-    tap((data: ProductDTO[]) => { 
-      // Ahora data tiene tipo y tap está importado
-      console.log('--- DEBUG INVENTARIO ---');
-      console.log('Productos recibidos del servidor:', data);
-    })
-  );
+  return this.http.get<ProductDTO[]>(this.url);
 }
 
 save(producto: any): Observable<any> {

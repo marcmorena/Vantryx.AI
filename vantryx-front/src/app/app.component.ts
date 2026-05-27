@@ -89,8 +89,7 @@ export class AppComponent implements OnInit {
         this.isLoading = false;
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('Error cargando productos:', err);
+      error: () => {
         this.dashboardCargando = false;
         this.isLoading = false;
         this.cdr.detectChanges();
@@ -104,7 +103,7 @@ export class AppComponent implements OnInit {
         this.financialStats = data;
         this.cdr.detectChanges();
       },
-      error: (err) => console.error('Error cargando stats financieros:', err)
+      error: () => {}
     });
   }
 
@@ -139,10 +138,9 @@ cargarCategorias() {
   this.categoryService.getAll().subscribe({
     next: (data) => {
       this.categories = data;
-      console.log('Categorías cargadas en el Dashboard:', this.categories.length);
       this.cdr.detectChanges();
     },
-    error: (err) => console.error('Error al cargar categorías en Dashboard', err)
+    error: () => {}
   });
 }
 
@@ -179,16 +177,12 @@ confirmarEliminarCategoria(event: Event, catABorrar: any) {
         this.categoryService.setCategoriaSeleccionada(catGeneral.id);
 
         setTimeout(() => {
-  
-          this.vistaActual = 'productos'; 
-          
-          console.log('Navegando a General con datos actualizados');
+          this.vistaActual = 'productos';
         }, 300);
 
         this.cargarCategorias();
       },
-      error: (err) => {
-        console.error('Error:', err);
+      error: () => {
         alert('No se pudo eliminar la categoría.');
       }
     });

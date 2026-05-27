@@ -1,14 +1,14 @@
-// purchase-order.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { PurchaseOrderResponseDTO, PurchaseOrderRequestDTO } from '../models/purchase-order.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PurchaseOrderService {
-  private apiUrl = 'http://localhost:8080/api/purchase-orders';
+  private apiUrl = `${environment.apiBaseUrl}/api/purchase-orders`;
 
   constructor(private http: HttpClient) { }
 

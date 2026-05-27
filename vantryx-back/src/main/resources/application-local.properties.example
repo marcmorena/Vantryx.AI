@@ -1,0 +1,28 @@
+# =====================================================
+# VANTRYX AI — Configuración local de desarrollo
+# =====================================================
+# 1. Copia este archivo y renómbralo a:
+#       application-local.properties
+# 2. Rellena los valores con tus credenciales reales
+# 3. application-local.properties está en .gitignore
+#    — nunca lo subas al repositorio
+# =====================================================
+
+# Base de datos PostgreSQL
+DB_URL=jdbc:postgresql://localhost:5432/vantryx_db
+DB_USERNAME=tu_usuario
+DB_PASSWORD=tu_contraseña
+
+# JWT — genera una clave larga y aleatoria (mínimo 256 bits)
+# Ejemplo: openssl rand -hex 32
+JWT_SECRET=pon_aqui_tu_clave_jwt_secreta
+
+# Ollama (IA local) — por defecto apunta a localhost
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=phi3
+
+# Email (Mailtrap para desarrollo, SMTP real para producción)
+MAIL_HOST=sandbox.smtp.mailtrap.io
+MAIL_PORT=587
+MAIL_USERNAME=tu_usuario_mailtrap
+MAIL_PASSWORD=tu_password_mailtrap

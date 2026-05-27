@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { SaleDTO, DashboardStatsDTO, StockPredictionDTO } from '../models/sale.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class SaleService {
-  private salesUrl  = 'http://localhost:8080/api/sales';
-  private statsUrl  = 'http://localhost:8080/api/stats/summary';
-  private aiUrl     = 'http://localhost:8080/api/ai/predict';
+  private salesUrl  = `${environment.apiBaseUrl}/api/sales`;
+  private statsUrl  = `${environment.apiBaseUrl}/api/stats/summary`;
+  private aiUrl     = `${environment.apiBaseUrl}/api/ai/predict`;
 
   constructor(private http: HttpClient) {}
 
