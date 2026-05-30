@@ -10,7 +10,7 @@
 
 ---
 
-## 📖 Table of contents
+## Table of contents
 
 - [Description](#-description)
 - [Architecture](#-architecture)
@@ -27,7 +27,7 @@
 
 ---
 
-## 📋 Description
+## Description
 
 **Vantryx AI** is a full-stack intelligent inventory management system that combines traditional ERP operations with two layers of artificial intelligence. Built on a **Spring Boot 3** backend and an **Angular 21 zoneless** frontend, it centralises products, suppliers, purchase orders, sales, and movement audit trails (kardex) into a single reactive dashboard, while delegating decision support to algorithmic and generative AI components running entirely on the host machine.
 
@@ -35,7 +35,7 @@ At its core lies a **predictive engine** that analyses sales velocity, lead time
 
 ---
 
-## 🏛 Architecture
+## Architecture
 
 Vantryx AI follows a classic **layered architecture** on the backend (Controller → Service → Repository → Persistence) with cross-cutting concerns handled through Spring's interceptor and aspect chain. The frontend is a single-page application that consumes the REST API and delegates all business logic to the server, keeping the client thin and focused on presentation.
 
@@ -114,7 +114,7 @@ A typical authenticated request flows through the system as follows:
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |---|---|
@@ -145,7 +145,7 @@ A typical authenticated request flows through the system as follows:
 
 ---
 
-## ✨ Features
+## Features
 
 ### 📊 Executive dashboard
 - Real-time inventory valuation aggregated across all SKUs
@@ -193,7 +193,7 @@ A typical authenticated request flows through the system as follows:
 
 ---
 
-## 📁 Project structure
+## Project structure
 
 ```
 Vantryx_project/
@@ -250,7 +250,7 @@ Vantryx_project/
 
 ---
 
-## 🚀 Getting started
+## Getting started
 
 The project is a monorepo containing both backend and frontend. After cloning, you'll have a fully working local environment with PostgreSQL (Docker), the Spring Boot API, the Angular SPA and the local LLM running.
 
@@ -282,7 +282,7 @@ docker compose up -d postgres
 
 This boots PostgreSQL 16 on `localhost:5432` with database `vantryx_db`. Data persists in a Docker volume (`vantryx_db_data`) so it survives container restarts.
 
-> ✅ **Verify**: `docker ps` should list a container named `vantryx-db-container` in `Up` state.
+> **Verify**: `docker ps` should list a container named `vantryx-db-container` in `Up` state.
 
 ### 3 · Pull the LLM model (Ollama)
 
@@ -291,7 +291,7 @@ ollama pull phi3      # downloads ~2.3 GB the first time
 ollama serve          # leave running in a background terminal
 ```
 
-> ✅ **Verify**: open `http://localhost:11434` in your browser — you should see `"Ollama is running"`.
+> **Verify**: open `http://localhost:11434` in your browser — you should see `"Ollama is running"`.
 
 ### 4 · Configure backend credentials
 
@@ -310,7 +310,7 @@ MAIL_USERNAME=<your Mailtrap user, optional>
 MAIL_PASSWORD=<your Mailtrap password, optional>
 ```
 
-> 🔒 This file is in `.gitignore` — it will never be committed to the repository.
+> This file is in `.gitignore` — it will never be committed to the repository.
 
 ### 5 · Run the backend
 
@@ -321,7 +321,7 @@ cd vantryx-back
 
 The backend listens on **http://localhost:8080**.
 
-> ✅ **Verify**:
+> **Verify**:
 > - Swagger UI → `http://localhost:8080/swagger-ui.html`
 > - Default admin user (auto-created on first boot): `admin` / `admin123`
 
@@ -339,7 +339,7 @@ The SPA is now available at **http://localhost:4200**. Log in with `admin` / `ad
 
 ---
 
-### 🧰 Troubleshooting
+### Troubleshooting
 
 | Symptom | Cause | Fix |
 |---|---|---|
@@ -352,7 +352,7 @@ The SPA is now available at **http://localhost:4200**. Log in with `admin` / `ad
 
 ---
 
-## ⚙️ Environment variables
+## Environment variables
 
 All sensitive credentials are loaded from environment variables (Spring) or from the `application-local.properties` file (excluded from the repository).
 
@@ -377,7 +377,7 @@ All sensitive credentials are loaded from environment variables (Spring) or from
 
 ---
 
-## 🔌 API endpoints
+## API endpoints
 
 > Full interactive documentation available at Swagger UI: `http://localhost:8080/swagger-ui.html`
 
@@ -437,7 +437,7 @@ All sensitive credentials are loaded from environment variables (Spring) or from
 
 ---
 
-## 🧠 Design decisions
+## Design decisions
 
 ### Why Angular zoneless
 Angular 21 makes it possible to run the application **without Zone.js**, eliminating a monkey-patching layer over the browser's native APIs. In exchange, change detection is no longer automatic — it must be triggered manually via `ChangeDetectorRef.detectChanges()` after every async callback. The result: smaller bundles, better runtime performance, and explicit control over the render cycle.
@@ -463,7 +463,7 @@ Without Angular Router (the project is a single-page dashboard), navigation is m
 
 ---
 
-## 🗺 Roadmap
+## Roadmap
 
 Technical improvements that would take the project to the next level:
 
@@ -497,13 +497,13 @@ Technical improvements that would take the project to the next level:
 
 ---
 
-## 👤 Author
+## Author
 
 **Marc Morena Herranz**
 
-- 💼 LinkedIn: www.linkedin.com/in/marc-morena-herranz-27b74334a
-- 🐙 GitHub: https://github.com/marcmorena/Vantryx.AI
-- 📧 Email: mmorena.denia@gmail.com
+- LinkedIn: www.linkedin.com/in/marc-morena-herranz-27b74334a
+- GitHub: https://github.com/marcmorena/Vantryx.AI
+- Email: mmorena.denia@gmail.com
 
 ---
 
