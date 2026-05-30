@@ -199,27 +199,6 @@ A typical authenticated request flows through the system as follows:
 
 ---
 
-
-<div align="center">
-
-### Executive dashboard
-![Dashboard](docs/01-dashboard.png)
-*Real-time valuation, critical-stock panel and category navigation.*
-
-### Inventory management
-![Inventory](docs/02-inventory.png)
-*Product CRUD with combined search, category filter and inline stock adjustment.*
-
-### AI Assistant (slide-over)
-![AI Assistant](docs/03-ai-assistant.png)
-*Local LLM analysis with elapsed-time indicator and per-session history.*
-
-### Stock movements (kardex)
-![Kardex](docs/04-kardex.png)
-*Immutable audit trail with velocity statistics and days-until-stockout.*
-
-</div>
-
 ---
 
 ## 📁 Project structure
