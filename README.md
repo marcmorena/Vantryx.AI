@@ -507,12 +507,11 @@ Technical improvements that would take the project to the next level:
 
 ## 👤 Author
 
-**[Your Name]**
+**[Marc Morena Herranz]**
 
-- 🌐 Portfolio: [your-portfolio.com]
-- 💼 LinkedIn: [linkedin.com/in/your-username]
-- 🐙 GitHub: [@your-github-username](https://github.com/your-github-username)
-- 📧 Email: [your@email.com]
+- 💼 LinkedIn: www.linkedin.com/in/marc-morena-herranz-27b74334a
+- 🐙 GitHub: https://github.com/marcmorena/Vantryx.AI
+- 📧 Email: mmorena.denia@gmail.com
 
 ---
 
