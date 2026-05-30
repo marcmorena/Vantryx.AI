@@ -1,18 +1,10 @@
 <div align="center">
 
-# 🤖 Vantryx AI
+# Vantryx AI
 
 ### Intelligent inventory management with prescriptive analysis powered by a local LLM
 
 *Inventory management + Machine Learning + Large Language Models — all running locally*
-
-![Java](https://img.shields.io/badge/Java-21-007396?logo=openjdk&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.4-6DB33F?logo=springboot&logoColor=white)
-![Angular](https://img.shields.io/badge/Angular-21.2-DD0031?logo=angular&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.2-06B6D4?logo=tailwindcss&logoColor=white)
-![Ollama](https://img.shields.io/badge/Ollama-phi3-000000?logo=ollama&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
 
 </div>
 
