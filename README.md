@@ -199,9 +199,6 @@ A typical authenticated request flows through the system as follows:
 
 ---
 
-## 📸 Screenshots
-
-> 💡 Replace these placeholders with real screenshots saved under `docs/`. Recommended size: 1600 × 1000 px, exported as PNG with the dashboard's dark background.
 
 <div align="center">
 
