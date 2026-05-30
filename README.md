@@ -507,7 +507,7 @@ Technical improvements that would take the project to the next level:
 
 ## 👤 Author
 
-**[Marc Morena Herranz]**
+**Marc Morena Herranz**
 
 - 💼 LinkedIn: www.linkedin.com/in/marc-morena-herranz-27b74334a
 - 🐙 GitHub: https://github.com/marcmorena/Vantryx.AI
